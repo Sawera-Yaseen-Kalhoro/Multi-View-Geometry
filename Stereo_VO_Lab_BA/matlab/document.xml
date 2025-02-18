@@ -1,0 +1,737 @@
+<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:pPr><w:pStyle w:val="title"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Lab 4: Stereo Visual Odometry</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Visual Odometry(VO)</w:t></w:r><w:r><w:t> is the process of estimating the 6 DOF motion of a vehicle from one or multiple camera video input. Here, we have a camera (or array of cameras) rigidly attached to a moving object, and we want to estimate the position and rotation using the video stream. When we use one camera the process is called </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>Monocular Visual Odometry; </w:t></w:r><w:r><w:t>whereas, with a two camera system it is referred as </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>Stereo Visual Odometry.</w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading3"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:rPr><w:b/></w:rPr><w:t>Why use stereo or monocular?</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>The advantage of stereo is that you can estimate the exact trajectory, while in monocular you can only estimate the trajectory, unique, only up to a scale factor. So, in monocular VO, you can only say that you moved some arbitrary units in x, y, and z. On the other hand, stereo VO tends to be more robust, but in cases where the distance to the objects is too high the stereo case degenerates to the monocular case.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Framework</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>There are plenty of approaches to implement Stereo VO. The simple algorithm that we are going to implement follows the next schematic:</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>System initialization:</w:t></w:r><w:r><w:t> The first frame of the video sequence is obtained and the system, camera parameters, and intial position is initialized.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Receiving new data:</w:t></w:r><w:r><w:t> A new stereo pair set is received into the system.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Feature detection and extraction:</w:t></w:r><w:r><w:t> Detect the features on the left and right images an perform the extraction of the descriptors.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Matching:</w:t></w:r><w:r><w:t> The matching is performed in a circular way between two set of consecutive frames.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Triangulation of 3D points:</w:t></w:r><w:r><w:t> Stereo triangulation is used to obtain the 3D points of the frame at a time t-1.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Computing R and T matrices:</w:t></w:r><w:r><w:t> The 3D points are reprojected into the current image, and by iteratively solving the minimum reprojection error, the rotation R and translation T matrices are computed. These matrices represents the incremental movement performed by the system from t-1 to t.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Iterate until all frames are processed.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Download and Explore the Input Stereo Image Sequence</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>The data used in this example are from the</w:t></w:r><w:r><w:t> </w:t></w:r><w:hyperlink w:docLocation="http://asrl.utias.utoronto.ca/datasets/2020-vtr-dataset/"><w:r><w:t>UTIAS Long-Term Localization and Mapping Dataset</w:t></w:r></w:hyperlink><w:r><w:t> provided by University of Toronto Institute for Aerospace Studies. To getr the data you have two options: </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>You can download the data to a temporary directory using a web browser. This is the prefered option.  You need to define the folder where you extracted in the code below</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Alternatively you the code below to download and extract the iamges from the ZIP file. In this case you have to set </w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t>isDataAlreadyDownloaded = false;</w:t></w:r><w:r><w:t> </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Cleaning the work environment
+clc;
+clear;
+
+isDataAlreadyDownloaded = true;
+
+if isDataAlreadyDownloaded
+    % Option 1 - You have already downloaded and extracted the data. Please specify the directory where you have unzipped the run_000005.zip file 
+    % dataFolder = 'E:\temp\mvg_lab4_data\';
+    dataFolder = 'C:\Users\vania\Documents\IFROS_Master\Sem1\Multiview_Geometry\Lab4\run_000005\';
+else
+    % Option 2 - Loading data from server. Will take a long time
+    ftpObj       = ftp('asrl3.utias.utoronto.ca');
+    tempFolder   = fullfile(tempdir);
+    dataFolder   = [tempFolder, '2020-vtr-dataset/UTIAS-In-The-Dark/'];
+    zipFileName  = [dataFolder, 'run_000005.zip'];
+    folderExists = exist(dataFolder, 'dir');
+
+    % Create a folder in a temporary directory to save the downloaded file
+    if ~folderExists
+        mkdir(dataFolder);
+        disp('Downloading run_000005.zip (818 MB). This download can take a few minutes.')
+        mget(ftpObj,'/2020-vtr-dataset/UTIAS-In-The-Dark/run_000005.zip', tempFolder);
+
+        % Extract contents of the downloaded file
+        disp('Extracting run_000005.zip (818 MB) ...')
+        unzip(zipFileName, dataFolder);
+    end
+end
+
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Use two </w:t></w:r><w:hyperlink w:docLocation="https://www.mathworks.com/help/matlab/ref/matlab.io.datastore.imagedatastore.html"><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>imageDatastore</w:t></w:r></w:hyperlink><w:r><w:t> objects to store the stereo images.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[imgFolderLeft  = [dataFolder,'images/left/'];
+imgFolderRight = [dataFolder,'images/right/'];
+imdsLeft       = imageDatastore(imgFolderLeft);
+imdsRight      = imageDatastore(imgFolderRight);
+
+% Inspect the first pair of images
+currFrameIdx   = 1;
+currILeft      = readimage(imdsLeft, currFrameIdx);
+currIRight     = readimage(imdsRight, currFrameIdx);
+imshowpair(currILeft, currIRight, 'montage');]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Set the camera parameters</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Next we initialize our camera system. This consist of two cameras that are mounted on the same rig and displaced by some distance (baseline). The stereo system needs to consider the intrinsic matrices of the cameras </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/></w:customXmlPr><w:r><w:t>K_1</w:t></w:r></w:customXml><w:r><w:t>, </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/></w:customXmlPr><w:r><w:t>K_2</w:t></w:r></w:customXml><w:r><w:t> , which are equal in this case. Also, the extrinsic parameters of camera2 (right camera) is defined by the baseline and no rotation in the coordinate system. Remeber that:</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="center"/></w:pPr><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId1"/></w:customXmlPr><w:r><w:t>K=\left\lbrack \begin{array}{ccc}
+f_u  &amp; 0 &amp; u_0 \\
+0 &amp; f_v  &amp; v_o \\
+0 &amp; 0 &amp; 1
+\end{array}\right\rbrack</w:t></w:r></w:customXml><w:r><w:t> and </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId2"/></w:customXmlPr><w:r><w:t>P=K\;\left\lbrack \begin{array}{cc}
+R &amp; t
+\end{array}\right\rbrack</w:t></w:r></w:customXml></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>To do this you can make use of matlab structures such as </w:t></w:r><w:hyperlink w:docLocation="https://es.mathworks.com/help/vision/ref/cameraparameters.html"><w:r><w:t>cameraPameters</w:t></w:r></w:hyperlink><w:r><w:t> and </w:t></w:r><w:hyperlink w:docLocation="https://es.mathworks.com/help/vision/ref/stereoparameters.html"><w:r><w:t>StereoParameters</w:t></w:r></w:hyperlink><w:r><w:t>.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Load the initial camera pose. The initial camera pose is derived based 
+% on the transformation between the camera and the vehicle:
+% http://asrl.utias.utoronto.ca/datasets/2020-vtr-dataset/text_files/transform_camera_vehicle.txt 
+initialPoseRotation = [7.963270829459690e-04, -0.999999682931538, 1.034228258589565e-12; -0.330471987613750, -2.631638783086032e-04, -0.943815763879472; 0.943815464625260, 7.515860537466446e-04, -0.330472092396028];
+initialPoseTranslation = [0.159, 0.119, 1.528];
+initialPose = rigid3d(initialPoseRotation,initialPoseTranslation); % create a rigid3d object with the initial camera pose
+
+% Create a stereoParameters object to store the stereo camera parameters.
+% The intrinsics for the dataset can be found at the following page:
+% http://asrl.utias.utoronto.ca/datasets/2020-vtr-dataset/text_files/camera_parameters.txt
+focalLength     = [387.777 387.777];     % specified in pixels
+principalPoint  = [257.446 197.718];     % specified in pixels [x, y]
+baseline        = 0.239965;              % specified in meters
+intrinsicMatrix = [focalLength(1), 0, 0; 0, focalLength(2), 0; principalPoint(1), principalPoint(2), 1]; % Note that matlab uses the K matrix as the transpose of what the normal convention...
+imageSize       = size(currILeft,[1:2]); % in pixels [mrows, ncols]
+cameraParam     = cameraParameters('IntrinsicMatrix', intrinsicMatrix, 'ImageSize', imageSize);
+intrinsics      = cameraParam.Intrinsics;
+stereoParams    = stereoParameters(cameraParam, cameraParam, eye(3), [-baseline, 0 0]);]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Processing a new incoming frame</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Before continuing with the process, we must perform a number of preprocessing steps. The first is to undistort the images, which is a process that compensates for lens distortion. Then, a rectification step is needed to completely aligned the image from the left camera with the right camera.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% In this example, the images are already undistorted. In a general
+% workflow, uncomment the following code to undistort the images.
+%currILeft  = undistortImage(currILeft, intrinsics);
+%currIRight = undistortImage(currIRight, intrinsics);
+
+% Rectify the stereo images
+[currILeft, currIRight] = rectifyStereoImages(currILeft, currIRight, stereoParams, 'OutputView','full');]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Feature extraction</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>After the pre-processing step of the images, we need to extract the features that we will use later to compare which points on each image correspond to the same point. To do this you can use any feature detector that you prefer. Information of different feature detectors can be found </w:t></w:r><w:hyperlink w:docLocation="https://www.analyticsvidhya.com/blog/2021/06/feature-detection-description-and-matching-of-images-using-opencv/"><w:r><w:t>here</w:t></w:r></w:hyperlink><w:r><w:t>. Each feature detector and extraction algorithm works on the entire image, but this can give you results in which most features would be concentrated in certain rich regions while other regions would not have any representation. This is not good for a VO system, since it relies on the assumption of a static scene, and to find it we must look into all the image. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>In order to tackle this, one approach that we can explore is called </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>Bucketing</w:t></w:r><w:r><w:t>, which basically consists on dividing the image into grids and extract features from each of this grids, thus maintaining a more uniform distribution of features.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Setting extractor parameters
+numPoints = 500; % Total points to extract uniformly
+MetricThreshold = 50; % A lower value extracts more feature
+ScaleLevels = 6;
+
+% Detect Features in the left image
+[currFeaturesLeft_n, currPointsLeft_n] = DetectandExtractFeatures(currILeft,MetricThreshold,ScaleLevels,numPoints);
+
+% Detect features by bucketing
+h_divs = 2;
+w_divs = 3;
+[currFeaturesLeft, currPointsLeft] = BucketFeaturesExtraction(currILeft,MetricThreshold,ScaleLevels,numPoints,w_divs,h_divs);
+
+% Detect Features in the right image
+[currFeaturesRight, currPointsRight] = BucketFeaturesExtraction(currIRight,MetricThreshold,ScaleLevels,numPoints,w_divs,h_divs);
+
+% Visualizing the results of each technique in the left image
+subplot(1,2,1)
+imshow(currILeft); hold on; plot(currPointsLeft_n); hold off;
+title('Original Points')
+
+subplot(1,2,2)
+imshow(currILeft); hold on; plot(currPointsLeft); hold off
+title('Bucketing Points')]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Circular matching</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>The matching technique that we are going to explore for our system is called </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>Circular matching. </w:t></w:r><w:r><w:t>Basically, It consists in taking a feature (</w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId3"/></w:customXmlPr><w:r><w:t>P_1</w:t></w:r></w:customXml><w:r><w:t>) from the left camera frame at time </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/></w:customXmlPr><w:r><w:t>t-1</w:t></w:r></w:customXml><w:r><w:t> and compare it against al features in the right image at time </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId4"/></w:customXmlPr><w:r><w:t>t-1</w:t></w:r></w:customXml><w:r><w:t>. The best match of this process will be our feature </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId5"/></w:customXmlPr><w:r><w:t>P_2</w:t></w:r></w:customXml><w:r><w:t> and we will match it with the correspoding right image at time </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId6"/></w:customXmlPr><w:r><w:t>t</w:t></w:r></w:customXml><w:r><w:t>. This process is repeated until we close the cycle, and if </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId7"/></w:customXmlPr><w:r><w:t>P_5 =P_1</w:t></w:r></w:customXml><w:r><w:t> then we consider it as a good match.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="center"/></w:pPr><w:customXml w:element="image"><w:customXmlPr><w:attr w:name="height" w:val="360"/><w:attr w:name="width" w:val="610"/><w:attr w:name="verticalAlign" w:val="baseline"/><w:attr w:name="altText" w:val="Asset 1.png"/><w:attr w:name="relationshipId" w:val="rId8"/></w:customXmlPr></w:customXml></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>You can now implement this algorithm and show some results of the points matched in image left </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId4"/></w:customXmlPr><w:r><w:t>t-1</w:t></w:r></w:customXml><w:r><w:t> and image let at </w:t></w:r><w:customXml w:element="equation"><w:customXmlPr><w:attr w:name="displayStyle" w:val="false"/><w:attr w:name="encoding" w:val="mathml"/><w:attr w:name="relationshipId" w:val="rId6"/></w:customXmlPr><w:r><w:t>t</w:t></w:r></w:customXml><w:r><w:t> after this process.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[%% Getting a new stereo pair
+% Saving previous frame data
+lastILeft = currILeft;
+lastIRigt = currIRight;
+prevPointsLeft = currPointsLeft;
+prevDescriptorsLeft = currFeaturesLeft;
+prevPointsRight = currPointsRight;
+prevDescriptorsRight = currFeaturesRight;
+
+% Reading the new frame
+currFrameIdx   = 2;
+currILeft      = readimage(imdsLeft, currFrameIdx);
+currIRight     = readimage(imdsRight, currFrameIdx);
+
+% Undistort the images
+%currILeft  = undistortImage(currILeft, intrinsics);
+%currIRight = undistortImage(currIRight, intrinsics);
+% Rectify the stereo images
+[currILeft, currIRight] = rectifyStereoImages(currILeft, currIRight, stereoParams, 'OutputView','full');
+
+% Computing features for the current frame
+% Left image
+[currFeaturesLeft, currPointsLeft] = BucketFeaturesExtraction(currILeft,MetricThreshold,ScaleLevels,numPoints,w_divs,h_divs);
+% Right image
+[currFeaturesRight, currPointsRight] = BucketFeaturesExtraction(currIRight,MetricThreshold,ScaleLevels,numPoints,w_divs,h_divs);
+
+
+% Iterate over all keypoint observations of image_left at t-1
+% A successful match is only declared when, after the cycle, the keypoint
+% in the left image at t-1 is tracked and match over all images.
+matches_l1 = [];
+matches_r1 = [];
+matches_l2 = [];
+matches_r2 = [];
+
+for kpt_left1 = 1:size(prevDescriptorsLeft,1)
+    % Matching first feature in left t-1 with right t-1
+    idx_pairs_l1_r1 = matchFeatures(prevDescriptorsLeft(kpt_left1,:),prevDescriptorsRight);
+    idx_pairs_l1_r1(:,1) = kpt_left1;
+    if isempty(idx_pairs_l1_r1)
+        continue;
+    end
+
+    % Matching found feature in right t-1 with features in right t
+    idx_pairs_r1_r2 = matchFeatures(prevDescriptorsRight(idx_pairs_l1_r1(:,2),:),currFeaturesRight);
+    idx_pairs_r1_r2(:,1) = idx_pairs_l1_r1(:,2);
+    if isempty(idx_pairs_r1_r2)
+        continue;
+    end
+
+    % Matching found feature in right t with features in left t
+    idx_pairs_r2_l2 = matchFeatures(currFeaturesRight(idx_pairs_r1_r2(:,2),:),currFeaturesLeft);
+    idx_pairs_r2_l2(:,1) = idx_pairs_r1_r2(:,2);
+    if isempty(idx_pairs_r2_l2)
+        continue;
+    end
+
+    % Matching found feature in left t with features in left t-1
+    % closing the cycle
+    idx_pairs_l2_l1 = matchFeatures(currFeaturesLeft(idx_pairs_r2_l2(:,2),:),prevDescriptorsLeft);
+    idx_pairs_l2_l1(:,1) = idx_pairs_r2_l2(:,2);
+    if isempty(idx_pairs_l2_l1)
+        continue;
+    end
+
+    % If the circular matching has been successful then accept the feature
+    % as a match
+    if (kpt_left1==idx_pairs_l2_l1(2))
+        % Retrieve the coordinates of matched features
+        matched_pt_l1 = prevPointsLeft(kpt_left1);
+        matched_pt_l2 = currPointsLeft(idx_pairs_r2_l2(2));
+        matched_pt_r1 = prevPointsRight(idx_pairs_l1_r1(2));
+        matched_pt_r2 = currPointsRight(idx_pairs_r1_r2(2));
+
+        matches_l1 = [matches_l1;kpt_left1];
+        matches_r1 = [matches_r1;idx_pairs_l1_r1(2)];
+        matches_l2 = [matches_l2;idx_pairs_r2_l2(2)];
+        matches_r2 = [matches_r2;idx_pairs_r1_r2(2)];
+    end
+end
+
+pts_matches_l1 = prevPointsLeft(matches_l1);
+pts_matches_r1 = prevPointsRight(matches_r1);
+pts_matches_l2 = currPointsLeft(matches_l2);
+pts_matches_r2 = currPointsRight(matches_r2);
+
+figure; showMatchedFeatures(lastILeft,currILeft,pts_matches_l1,pts_matches_l2);
+title('Matches between left image at t-1 and t')]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Comparing two methods to estimate stereo motion</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>We will now compare two distinct approaches for performing stereo registration and we will compare them in terms of uncertainty of the results that the two aproaches provide. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Both approaches take, as input, two pairs of stereo images acquired with the same stereo camera. It further assumes that we are able to find correct matches between all four images, i.e we have a set of points in one image where we know their correspondences in the other 3 images. We call this points as 'circular' matches.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>The first approach, called "3D to 3D", consists in </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Creating two 3D point clouds, one for each stereo pair, </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Aligning the point clouds using a rigid 3D transformation model</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Extracting the translation and rotation from the rigid 3D transformation model</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>The second approach, called "2D to 3D", consists in</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Creating just one 3D point cloud, from the first stereo pair</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Select the 2D points from one of the cameras of the second stereo pair</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="2"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:t>Solve the </w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t>Perspective-n-Point </w:t></w:r><w:r><w:t>(</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t>P3P</w:t></w:r><w:r><w:t>)</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t> </w:t></w:r><w:r><w:t>problem using these 2D points and the 3D point of the first stereo pair.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>The Perspective-n-Point</w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t> </w:t></w:r><w:r><w:t>problem concerns the estimation of the pose of a calibrated camera given a set of </w:t></w:r><w:r><w:rPr><w:i/></w:rPr><w:t>n</w:t></w:r><w:r><w:t> 3D points in the world and their corresponding 2D projections in the image. You can think of this problem as a simplified case of the camera calibration problem where we are only interested in finding the </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>R, t</w:t></w:r><w:r><w:t> elements of the camera projection matrix instead of the full projection matrix </w:t></w:r><w:r><w:rPr><w:b/></w:rPr><w:t>P</w:t></w:r><w:r><w:t>. You can quickly read more information on this method </w:t></w:r><w:hyperlink w:docLocation="https://en.wikipedia.org/wiki/Perspective-n-Point"><w:r><w:t>here</w:t></w:r></w:hyperlink><w:r><w:t>.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Method 3D to 3D
+% Get all matches for all images. These are filtered matches using the function below that implements robust estimation 
+inlierIdx = getInliersIdx(pts_matches_l1,pts_matches_r1,pts_matches_l2,stereoParams);
+pts_matches_l1_uv = prevPointsLeft(matches_l1(inlierIdx)).Location;
+pts_matches_r1_uv = prevPointsRight(matches_r1(inlierIdx)).Location;
+pts_matches_l2_uv = currPointsLeft(matches_l2(inlierIdx)).Location;
+pts_matches_r2_uv = currPointsRight(matches_r2(inlierIdx)).Location;
+
+figure; showMatchedFeatures(lastILeft,currILeft,pts_matches_l1_uv,pts_matches_l2_uv);
+figure; showMatchedFeatures(lastIRigt,currIRight,pts_matches_r1_uv,pts_matches_r2_uv);
+
+% Triangulation of 3D points at time t-1
+points3D_t1 = triangulate(pts_matches_l1_uv,pts_matches_r1_uv,stereoParams);
+
+% Triangulation of 3D points at time t
+points3D_t2 = triangulate(pts_matches_l2_uv,pts_matches_r2_uv,stereoParams);
+
+% Show the two point clouds, before alignment
+figure; pcshow(points3D_t1,[1 0 0]); hold on; pcshow(points3D_t2,[0 1 0]);
+
+% Select only points that are in a section of the 3D space 
+zmin = 0.5; % all points must be farther than this, in meters 
+zmax = 50;  % all points must be closer than this, in meters 
+[points3D_t1_valid,points3D_t2_valid] = select_based_on_z_distance(points3D_t1,points3D_t2,zmin,zmax);
+
+% Show the two point clouds, before alignment, but after removing areas that are not valid
+figure; pcshow(points3D_t1_valid,[1 0 0]); hold on; pcshow(points3D_t2_valid,[0 1 0]);
+% % Transforming points into the world coordinate system
+% points3D_t1_valid_world = points3D_t1_valid * initialPose.Rotation + initialPose.Translation;
+
+% Align using a rigid 3D transformation model
+estimatedTform = estimateGeometricTransform3D(points3D_t2_valid, points3D_t1_valid,'rigid');
+
+disp(['The result of 3D to 3D (translation) is ' num2str(estimatedTform.Translation)]);
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Method 2D to 3D
+
+% Triangulation of 3D points at time t-1
+points3D_t1 = triangulate(pts_matches_l1_uv,pts_matches_r1_uv,stereoParams);
+
+% % Transforming points into the world coordinate system
+% points3D_t1_world = points3D_t1 * initialPose.Rotation + initialPose.Translation;
+
+% motion estimation
+[R,t] = estimateWorldCameraPose(pts_matches_l2_uv,points3D_t1,intrinsics,'MaxReprojectionError', 10);
+
+disp(['The result of 2D to 3D (translation) is ' num2str(t)]);
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Bundle Adjustment (3D-3D) with two images</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>This code implements a bundle adjustment to improve the location of the two stereo cameras. The location of the 3D points are also re-estimated.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Setting initial parameters
+CameraPoses = cell(2,1);
+CameraPoses{1} = rigid3d(eye(3),[0 0 0]);
+CameraPoses{2} = rigid3d(R,t);
+pts_matches{1}.left = double(pts_matches_l1_uv); pts_matches{1}.right = double(pts_matches_r1_uv);
+pts_matches{2}.left = double(pts_matches_l2_uv); pts_matches{2}.right = double(pts_matches_r2_uv);
+
+% Calling the main function (this function is included at the end of this live script)
+[world_points,poses,t_optim] = BundleAdjustment(points3D_t1,pts_matches,CameraPoses,intrinsics,stereoParams);
+disp(['The result of 3D to 3D with bundle adjustment is (translation) ' num2str(t_optim)]);
+
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Performing sensitivity analysis using Monte Carlo</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Now we want to check how sensitive the two methods are in the presence of noise. So we will use a simple Monte Carlo algorithm. For this we will add random Gaussian noise and check what is the </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[
+% Do Monte-Carlo sensitivity test for method 3D to 3D
+noiseSTD = 0.1; % st dev of noise in pixels
+numRuns = 1000; % number of runs
+
+% This is a call to the function that you have to create.
+% There is an empty function at the end of the live script for you to fill in 
+[translationStack_3D3D] = mvg_montecarlo_3d_to_3d_reg(pts_matches_l1_uv,pts_matches_r1_uv,pts_matches_l2_uv,pts_matches_r2_uv,stereoParams,noiseSTD,numRuns);
+
+
+translationMean = mean(translationStack_3D3D);
+translationCov = cov(translationStack_3D3D);
+
+
+% This is a call to the function that you have to create.
+% There is an empty function at the end of the live script for you to fill in 
+[translationStack_2D3D] = mvg_montecarlo_2d_to_3d_reg(pts_matches_l1_uv,pts_matches_r1_uv,pts_matches_l2_uv,pts_matches_r2_uv,stereoParams,noiseSTD,numRuns);
+
+
+% This are just two alternative ways of showing the same data
+figure;
+pcshow(translationStack_3D3D,[1 0 0],'MarkerSize',15);
+hold on;
+pcshow(translationStack_2D3D,[0 1 0],'MarkerSize',15);
+xlabel('X'); ylabel('Y'); zlabel('Z');
+
+figure;
+plot3(translationStack_3D3D(:,1),translationStack_3D3D(:,2),translationStack_3D3D(:,3),'r.','MarkerSize',6);
+hold on;
+plot3(translationStack_2D3D(:,1),translationStack_2D3D(:,2),translationStack_2D3D(:,3),'g.','MarkerSize',6);
+xlabel('X'); ylabel('Y'); zlabel('Z');
+axis equal;
+
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Processing the complete sequence of stereo pairs</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Repeat the process for all the images in the dataset and plot the trajectory resulting from the acquisition of the pose.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[R_prev = initialPoseRotation;
+t_prev = [initialPoseTranslation]';
+t_hist = [t_prev'];
+step_frames = 3;
+
+lastFrameToProcess = size(imdsLeft.Files,1);
+
+use2D3D = true;
+
+
+waitbarHndl = waitbar(0,'Processing the sequence ...');
+
+for currFrameIdx = 2:step_frames:lastFrameToProcess
+    % Reading the new frame
+    disp(['Reading img ' num2str(currFrameIdx)]);
+    currILeft      = readimage(imdsLeft, currFrameIdx);
+    currIRight     = readimage(imdsRight, currFrameIdx);
+    
+    % Undistort the images
+    %currILeft  = undistortImage(currILeft, intrinsics);
+    %currIRight = undistortImage(currIRight, intrinsics);
+    % Rectify the stereo images
+    [currILeft, currIRight] = rectifyStereoImages(currILeft, currIRight, stereoParams, 'OutputView','full');
+    
+    % Computing features for the current frame
+    % Left image
+    [currFeaturesLeft, currPointsLeft] = BucketFeaturesExtraction(currILeft,MetricThreshold,ScaleLevels,numPoints,w_divs,h_divs);
+    % Right image
+    [currFeaturesRight, currPointsRight] = BucketFeaturesExtraction(currIRight,MetricThreshold,ScaleLevels,numPoints,w_divs,h_divs);
+
+    % Getting valid matches
+    matched_pts_idxs = CircularMatching(prevPointsLeft,prevPointsRight,currPointsLeft,currPointsRight,...
+        prevDescriptorsLeft,prevDescriptorsRight,currFeaturesLeft,currFeaturesRight);
+
+    pts_matches_l1 = prevPointsLeft(matched_pts_idxs.left1);
+    pts_matches_r1 = prevPointsRight(matched_pts_idxs.right1);
+    pts_matches_l2 = currPointsLeft(matched_pts_idxs.left2);
+    pts_matches_r2 = currPointsRight(matched_pts_idxs.right2);
+
+    % Triangulation of 3D points at t-1
+    %points3D_t1 = triangulate(pts_matches_l1,pts_matches_r1,stereoParams);
+    [points3D_t1,~,valid3D_t1] = triangulate(pts_matches_l1,pts_matches_r1,stereoParams);
+
+    %points3D_t2 = triangulate(pts_matches_l2,pts_matches_r2,stereoParams);
+    [points3D_t2,~,valid3D_t2] = triangulate(pts_matches_l2,pts_matches_r2,stereoParams);
+    
+    % Only accept the 3D points that are valid in both triangulations
+    % (valid means that the points are in front of all 4 cameras)
+    points3D_t1 = points3D_t1(valid3D_t1 & valid3D_t2,:);
+    points3D_t2 = points3D_t2(valid3D_t1 & valid3D_t2,:);
+
+    ptCloud_t1 = pointCloud(points3D_t1);
+    ptCloud_t2 = pointCloud(points3D_t2);
+
+    % Transforming 3D points into the world coordinate system
+    points3D_t1_world = points3D_t1 * R_prev + t_prev(1:3,:)';
+    
+    if use2D3D
+
+        %%  motion estimation with 2D-3D method %%
+        pts_matches_l2_valid_locations = pts_matches_l2(valid3D_t1 & valid3D_t2).Location; % Get valid locations, i.e. 2D coordinates of valid points
+        [R,t] = estimateWorldCameraPose(pts_matches_l2_valid_locations,points3D_t1_world,intrinsics,'Confidence', 95, 'MaxReprojectionError', 2, 'MaxNumTrials', 1e4);
+
+    else
+        %%  motion estimation with 3D-3D method %%
+        % Select only points that are in a section of the 3D space
+        zmin = 0.5; % all points must be farther than this, in meters
+        zmax = 50;  % all points must be closer than this, in meters
+        [points3D_t1_valid,points3D_t2_valid] = select_based_on_z_distance(points3D_t1,points3D_t2,zmin,zmax);
+        points3D_t1_valid_world = points3D_t1_valid * R_prev + t_prev(1:3,:)';
+        estimatedTform = estimateGeometricTransform3D(points3D_t2_valid, points3D_t1_valid_world,'rigid');
+
+        R = estimatedTform.Rotation;
+        t = estimatedTform.Translation;
+    end
+
+
+    R_prev = R;
+    t_prev = t(1:3)';
+    t_hist = [t_hist;t];
+
+    % Saving previous frame data
+    lastILeft = currILeft;
+    lastIRigt = currIRight;
+    prevPointsLeft = currPointsLeft;
+    prevDescriptorsLeft = currFeaturesLeft;
+    prevPointsRight = currPointsRight;
+    prevDescriptorsRight = currFeaturesRight;
+
+    waitbar(currFrameIdx/lastFrameToProcess,waitbarHndl,'Processing the sequence ...');
+end
+
+close(waitbarHndl)
+
+figure
+plot3(t_hist(:,1),t_hist(:,2),t_hist(:,3))
+axis equal
+xlabel('x');ylabel('y');zlabel('z')
+title('Stereo VO trajectory (world ref frame)');
+
+]]></w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Ground truth trajectory included in the dataset</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Load GPS data
+load('gpsLocation.mat');
+gpsLocation = gpsData.gpsLocation(1:step_frames:end,:);
+
+figure
+plot3(gpsLocation(:,1),gpsLocation(:,2),gpsLocation(:,3))
+axis equal
+xlabel('x');ylabel('y');zlabel('z')
+title('GPS trajectory (world ref frame)');
+
+
+
+]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Note: You can try to align the trajectories, for 1 extra point. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>We want to see the two trajectories (the GPS and the estimated from VO) on the same plot. To do this, you need to align the trajectories so that they start approximatelly in the same direction. You can solve this by computing the rigid transformation that maps the VO into the GPS. You can compute that transformation with the first quarter of both trajectories, and then apply the transformation to the whole VO trajectory. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Note that the GPS trajectory has significant noise. You can see some spikes and jumps in the Z direction. You can reduce the effect of those jumps by imposing  the Z  component of the GPS to be constant (eg Z = 0).</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[% Insert your code here to align and plot the two trajectoris on the same figure
+
+% impose z constraint of the GPS
+gpsLocation_z0 = gpsLocation;
+gpsLocation_z0(:,3) = 0;
+figure
+plot3(gpsLocation_z0(:,1),gpsLocation_z0(:,2),gpsLocation_z0(:,3))
+axis equal
+xlabel('x');ylabel('y');zlabel('z')
+title('GPS trajectory with z=0 constraint');
+% transform GPS data using the provided helper function
+gTruth = helperTransformGPSLocations(gpsLocation_z0, t_hist, eye(3));
+
+% plot the GPS and VO in the same figure
+figure
+plot3(t_hist(:,1),t_hist(:,2),t_hist(:,3))
+hold on
+plot3(gTruth(:,1),gTruth(:,2),gTruth(:,3))
+axis equal
+xlabel('x');ylabel('y');zlabel('z')
+title('Trajectory');
+legend('VO','GPS', 'location','northeast');
+]]></w:t></w:r></w:p><w:p><w:pPr><w:sectPr/></w:pPr></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Supporting functions</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>In Live scripts is possible to define functions that will run in your code. In this section, we can implement all the functions that we are going to use inside our code solution:</w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Detect and extract features over all image</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function [features,validPoints] = DetectandExtractFeatures(image,metricthreshold,levels,numPoints)
+    gray_image  = im2gray(image);
+    points = detectSURFFeatures(gray_image,'MetricThreshold',metricthreshold,'NumScaleLevels',levels);
+    % Select a subset of features, uniformly distributed throughout the image
+    points = selectUniform(points, numPoints, size(gray_image, 1:2));
+    % Extract features
+    [features, validPoints] = extractFeatures(gray_image, points);
+end]]></w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Bucketing</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function [features,validPoints] = BucketFeaturesExtraction(image,metricthreshold,levels,numPoints,width_divs,height_divs)
+   gray_image  = im2gray(image);
+   [height,width] = size(gray_image);
+   % Creating window  in where the features are extracted
+   x = floor(linspace(1,width-width/width_divs,width_divs));
+   y = floor(linspace(1,height-height/height_divs,height_divs));
+   
+   final_pts = [];
+   for i = 1:length(y)
+       for j = 1:length(x)
+           % Region of interest
+           roi = [x(j),y(i),floor(width/width_divs),floor(height/height_divs)];
+           % Extracting features in roi
+           points = detectSURFFeatures(gray_image,'MetricThreshold',metricthreshold,'NumScaleLevels',levels,'ROI',roi);
+           final_pts = vertcat(final_pts,points.Location);
+       end
+   end
+   final_pts = SURFPoints(final_pts);
+   % Select a subset of features, uniformly distributed throughout the image
+   %final_pts = selectUniform(final_pts, numPoints, size(gray_image, 1:2));
+   % Extract Features
+   [features, validPoints] = extractFeatures(gray_image, final_pts);
+end]]></w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Circular Matching function</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function matched_pts_idxs = CircularMatching(pts_left1,pts_right1,pts_left2,pts_right2,desc_left1,desc_right1,desc_left2,desc_right2)
+    % Iterate over all keypoint observations of image_left at t-1
+    % A successful match is only declared when, after the cycle, the keypoint
+    % in the left image at t-1 is tracked and match over all images.
+    matches_l1 = [];
+    matches_r1 = [];
+    matches_l2 = [];
+    matches_r2 = [];
+    
+    for kpt_left1 = 1:size(desc_left1,1)
+        % Matching first feature in left t-1 with right t-1
+        idx_pairs_l1_r1 = matchFeatures(desc_left1(kpt_left1,:),desc_right1);
+        idx_pairs_l1_r1(:,1) = kpt_left1;
+        if isempty(idx_pairs_l1_r1)
+            continue;
+        end
+    
+        % Matching found feature in right t-1 with features in right t
+        idx_pairs_r1_r2 = matchFeatures(desc_right1(idx_pairs_l1_r1(:,2),:),desc_right2);
+        idx_pairs_r1_r2(:,1) = idx_pairs_l1_r1(:,2);
+        if isempty(idx_pairs_r1_r2)
+            continue;
+        end
+    
+        % Matching found feature in right t with features in left t
+        idx_pairs_r2_l2 = matchFeatures(desc_right2(idx_pairs_r1_r2(:,2),:),desc_left2);
+        idx_pairs_r2_l2(:,1) = idx_pairs_r1_r2(:,2);
+        if isempty(idx_pairs_r2_l2)
+            continue;
+        end
+    
+        % Matching found feature in left t with features in left t-1 closing the cycle
+        idx_pairs_l2_l1 = matchFeatures(desc_left2(idx_pairs_r2_l2(:,2),:),desc_left1);
+        idx_pairs_l2_l1(:,1) = idx_pairs_r2_l2(:,2);
+        if isempty(idx_pairs_l2_l1)
+            continue;
+        end
+    
+        % If the circular matching has been successful then accept the feature
+        % as a match
+        if (kpt_left1==idx_pairs_l2_l1(2))
+            % Retrieve the coordinates of matched features
+            matched_pt_l1 = pts_left1(kpt_left1);
+            matched_pt_l2 = pts_left2(idx_pairs_r2_l2(2));
+            matched_pt_r1 = pts_right1(idx_pairs_l1_r1(2));
+            matched_pt_r2 = pts_right2(idx_pairs_r1_r2(2));
+    
+            % compute disparity
+            disp1 = matched_pt_l1.Location(2) - matched_pt_r1.Location(2);
+            disp2 = matched_pt_l2.Location(2) - matched_pt_r2.Location(2);
+    
+            % if disparities are positive then add the match
+            %if (disp1 > 0 && disp2 >0)
+            matches_l1 = [matches_l1;kpt_left1];
+            matches_r1 = [matches_r1;idx_pairs_l1_r1(2)];
+            matches_l2 = [matches_l2;idx_pairs_r2_l2(2)];
+            matches_r2 = [matches_r2;idx_pairs_r1_r2(2)];
+            %end
+        end
+    end
+    matched_pts_idxs.left1 = matches_l1;
+    matched_pts_idxs.right1 = matches_r1;
+    matched_pts_idxs.left2 = matches_l2;
+    matched_pts_idxs.right2 = matches_r2;
+end]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function [translationStack] = mvg_montecarlo_3d_to_3d_reg(pts_matches_l1,pts_matches_r1,pts_matches_l2,pts_matches_r2,stereoParams,noiseSTD,numRuns)
+% [translationStack] = mvg_montecarlo_3d_to_3d_reg(pts_matches_l1,pts_matches_r1,pts_matches_l2,pts_matches_r2,stereoParams,noiseSTD,numRuns)
+%
+% This function performs a Monte-Carlo runs using the method of 3D to 3D
+% registration. Returns a stack with the translations for each run
+ 
+
+% Initialize the stack
+translationStack = zeros(numRuns,3);
+
+for iterIdx = 1:numRuns
+
+    % Add noise to the image points
+
+    %% your code here %%
+    pts_matches_l1_noisy = pts_matches_l1 + normrnd(0,noiseSTD,size(pts_matches_l1));
+    pts_matches_r1_noisy = pts_matches_r1 + normrnd(0,noiseSTD,size(pts_matches_r1));
+    pts_matches_l2_noisy = pts_matches_l2 + normrnd(0,noiseSTD,size(pts_matches_l2));
+    pts_matches_r2_noisy = pts_matches_r2 + normrnd(0,noiseSTD,size(pts_matches_r2));
+
+    % Triangulation of 3D points from pair 1
+
+    %% your code here %%    
+    points3D_t1_noisy = triangulate(pts_matches_l1_noisy,pts_matches_r1_noisy,stereoParams);
+
+    % Triangulation of 3D points from pair 2
+
+    %% your code here %%    
+    points3D_t2_noisy = triangulate(pts_matches_l2_noisy,pts_matches_r2_noisy,stereoParams);
+
+    % Select only points that are in a section of the 3D space
+
+% uncomment these two lines after completing the rest %%            
+    zmin = 0.5; % all points must be farther than this, in meters
+    zmax = 50;  % all points must be closer than this, in meters
+    [points3D_t1_noisy_valid,points3D_t2_noisy_valid] = select_based_on_z_distance(points3D_t1_noisy,points3D_t2_noisy,zmin,zmax);
+
+    % Estimate the geometric transform
+
+%% uncomment these two lines after completing the rest %%        
+    [estimatedTform_noisy] = estimateGeometricTransform3D(points3D_t2_noisy_valid, points3D_t1_noisy_valid,'rigid','MaxDistance',10);
+    translationStack(iterIdx,:) = estimatedTform_noisy.Translation;
+end
+
+
+end
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function [translationStack] = mvg_montecarlo_2d_to_3d_reg(pts_matches_l1,pts_matches_r1,pts_matches_l2,pts_matches_r2,stereoParams,noiseSTD,numRuns)
+% function [resultStack] = mvg_montecarlo_2d_to_3d_reg(pts_matches_l1,pts_matches_r1,pts_matches_l2,pts_matches_r2,noiseSTD,noiseSTD)
+%
+% This function performs a Monte-Carlo runs using the method of 2D to 3D
+% registration. Returns a stack with the translations for each run
+
+
+
+% Initialize the stack
+translationStack = zeros(numRuns,3);
+
+for iterIdx = 1:numRuns
+    
+    % Add noise to the image points
+
+    %% your code here %%
+    pts_matches_l1_noisy = pts_matches_l1 + normrnd(0,noiseSTD,size(pts_matches_l1));
+    pts_matches_r1_noisy = pts_matches_r1 + normrnd(0,noiseSTD,size(pts_matches_r1));
+    pts_matches_l2_noisy = pts_matches_l2 + normrnd(0,noiseSTD,size(pts_matches_l2));
+    pts_matches_r2_noisy = pts_matches_r2 + normrnd(0,noiseSTD,size(pts_matches_r2));
+
+
+    % Triangulation of 3D points from pair 1
+
+    %% your code here %%
+    points3D_t1_noisy = triangulate(pts_matches_l1_noisy,pts_matches_r1_noisy,stereoParams);
+
+
+    % motion estimation
+
+%% uncomment these two lines after completing the rest %%        
+    intrinsics = stereoParams.CameraParameters1.Intrinsics;
+    [~,t] = estimateWorldCameraPose(pts_matches_l2_noisy,points3D_t1_noisy,intrinsics,'MaxReprojectionError', 10);
+    translationStack(iterIdx,:) = t;
+end
+
+   % [translationStack] = mvg_montecarlo_2d_to_3d_reg_nuno(pts_matches_l1,pts_matches_r1,pts_matches_l2,pts_matches_r2,stereoParams,noiseSTD,numRuns);
+
+end
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function [points3D_t1_valid,points3D_t2_valid] = select_based_on_z_distance(points3D_t1,points3D_t2,zmin,zmax)
+% Check points that are in a section of the 3D space
+
+  % initialize empty lists
+  points3D_t1_valid = [];
+  points3D_t2_valid = [];
+
+  % filter points
+  for i = 1:size(points3D_t1,1)
+      if points3D_t1(i,3) > zmin & points3D_t1(i,3) < zmax & points3D_t2(i,3) > zmin & points3D_t2(i,3) < zmax
+        points3D_t1_valid = [points3D_t1_valid;points3D_t1(i,:)];
+        points3D_t2_valid = [points3D_t2_valid;points3D_t2(i,:)];
+      end
+  end
+end]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function [inlierIdx] = getInliersIdx(pts_matches_l1,pts_matches_r1,pts_matches_l2,stereoParams)
+% This is just a function to get inliers for our initial example for comparing methods
+
+% Triangulation of 3D points at t-1
+[points3D_t1,~,valid3D_t1] = triangulate(pts_matches_l1,pts_matches_r1,stereoParams);
+points3D_t1 = points3D_t1(valid3D_t1,:);   
+
+% motion estimation
+intrinsics = stereoParams.CameraParameters1.Intrinsics;
+[~,~,inlierIdx] = estimateWorldCameraPose(pts_matches_l2(valid3D_t1).Location,points3D_t1,intrinsics);
+end]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Transform GPS</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[function gTruth = helperTransformGPSLocations(gpsLocations, translation_trajectory, initial_Rot)
+
+initialYawGPS  = atan( (gpsLocations(100, 2) - gpsLocations(1, 2)) / ...
+    (gpsLocations(100, 1) - gpsLocations(1, 1)));
+initialYawSLAM = atan((translation_trajectory(100,2) - ...
+    translation_trajectory(1,2) / ...
+    (translation_trajectory(100,1) - ...
+    translation_trajectory(1,1))));
+
+relYaw = initialYawGPS - initialYawSLAM;
+relTranslation = translation_trajectory(1,1:3);
+
+initialTform = rotationVectorToMatrix([0 0 relYaw]);
+TRot = initial_Rot*initialTform';
+for i = 1:size(gpsLocations, 1)
+    gTruth(i, :) =  TRot * gpsLocations(i, :)' + relTranslation';
+end
+end]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Bundle Adjustment</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[
+% Helper Functions
+function [Points3D, Poses, t_optim] = BundleAdjustment(world_points,observations,camera_params,camera_intrinsics,stereoParams)
+    params{1} = size(world_points,1);
+    params{2} = size(camera_params,1);
+    params{3} = observations;
+    params{4} = camera_intrinsics.IntrinsicMatrix';
+
+    % Right transformation matrix
+    l_T_r = [stereoParams.RotationOfCamera2 stereoParams.TranslationOfCamera2'; 0 0 0 1];
+    params{5} = l_T_r;
+
+    % Initial conditions
+    x0 =reshape(world_points',1,3*params{1});
+
+    % Fill initial camera parameters
+    for i=1:size(camera_params,1)
+        x0 = [x0,...
+            rotm2eul(camera_params{i}.Rotation'),...
+            camera_params{i}.Translation];
+    end
+
+    options = optimoptions('lsqnonlin','Display','iter','UseParallel',true,...
+                          'Algorithm','levenberg-marquardt');
+
+    x = lsqnonlin(@(x) reproj_func(x,params),double(x0),[],[],options);
+
+    Points3D = reshape(x(1:3*params{1}),[3 params{1}]);
+    Points3D = Points3D';
+    x(1:3*params{1}) = [];
+    for i=1:size(camera_params,1)
+        Poses(1:3,1:3,i) = eul2rotm(x(1:3));
+        Poses(1:3,4,i)   = x(4:6)';
+        x(1:6)            = [];
+    end
+
+    cam1pose_optim = rigid3d(Poses(1:3,1:3,1),Poses(1:3,4,1)');
+    cam2pose_optim = rigid3d(Poses(1:3,1:3,2),Poses(1:3,4,2)');
+    relativeT12 =  inv(cam1pose_optim.T')*cam2pose_optim.T';
+    t_optim = relativeT12(1:3,4)';
+
+
+end
+
+function F = reproj_func(x,params)
+    F=[];
+
+    points2d = params{3};
+    K = params{4};
+    l_T_r = params{5}; % stereo parameters transformation
+
+    for i=1:params{2}
+        for j=1:size(points2d,1)
+            % (u,v) of j-th observation in frame i-th
+            F = [F reproj(points2d{i}.left(j,1:2), ...
+                x((1:3) + 3*(j-1) )',     ...
+                [eul2rotm( x(3*params{1}+(1:3)+6*(i-1)) ) ...
+                x(3*params{1}+(4:6)+6*(i-1))'], ...
+                K),... % Left camera
+                reproj(points2d{i}.right(j,1:2), ...
+                x((1:3) + 3*(j-1) )',     ...
+                [eul2rotm( x(3*params{1}+(1:3)+6*(i-1)) ) ...
+                x(3*params{1}+(4:6)+6*(i-1))']*l_T_r, ...
+                K)];
+        end
+    end
+
+end
+
+function err = reproj(point2d,point3d,extrinsic,K)
+    err = sqrt(sum((point2d - proj(point3d, extrinsic, K)).^2));
+end
+
+function obs = proj(point, extrinsic, K)
+    if size(point,1) ~= 3
+        error('point must be 3x1 vector')
+    end
+    % transform to local coordinates
+    point = [extrinsic; 0 0 0 1]^-1 * [point; 1];
+    point = point(1:3);
+    % normalize
+    point = point/point(3);
+    % transform to image coordinates
+    obs = K*point;
+    % keep u and v
+    obs = obs(1:2)';
+end
+
+function eul = rotm2eul(R)
+	x = atan2(R(3,2), R(3,3));
+	y = atan2(-R(3,1), sqrt(R(3,2)*R(3,2) + R(3,3)*R(3,3)));
+	z = atan2(R(2,1), R(1,1));
+    eul = [x y z];
+end
+
+function R = eul2rotm(eul)
+    x = eul(1);
+    y = eul(2);
+    z = eul(3);
+    X = eye(3,3);
+    Y = eye(3,3);
+    Z = eye(3,3);
+    X(2,2) = cos(x);
+    X(2,3) = -sin(x);
+    X(3,2) = sin(x);
+    X(3,3) = cos(x);
+    Y(1,1) = cos(y);
+    Y(1,3) = sin(y);
+    Y(3,1) = -sin(y);
+    Y(3,3) = cos(y);
+    Z(1,1) = cos(z);
+    Z(1,2) = -sin(z);
+    Z(2,1) = sin(z);
+    Z(2,2) = cos(z);
+    R = Z*Y*X;
+end]]></w:t></w:r></w:p></w:body></w:document>
